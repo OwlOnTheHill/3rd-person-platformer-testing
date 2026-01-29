@@ -17,6 +17,7 @@ var debug_timer = 0.0
 const DEBUG_INTERVAL = 0.5
 var last_collided_wall: Node3D = null
 var sprinting_before_jump = false
+var was_on_floor = false
 
 func _ready() -> void:
 	pass
@@ -28,7 +29,14 @@ func _physics_process(delta: float) -> void:
 			velocity += WALL_GRAVITY * delta
 		else:
 			velocity += get_gravity() * delta
-
+	
+	# 1. detect when we just walked off a ledge
+	if was_on_floor and not is_on_floor() and velocity.y <= 0:
+		$CoyoteTimer.start()
+	
+	# 2. Update the "was_on_floor" state for the next frame
+	was_on_floor = is_on_floor()
+	
 	# get input direction and handle movement/deceleration
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	#changes keys to be oriented to camera direction
@@ -93,6 +101,6 @@ func _physics_process(delta: float) -> void:
 		sprinting_before_jump = false
 		print("on floor, jumped_on set to false")
 
-	if is_on_floor() and Input.is_action_just_pressed("jump"):
+	if (is_on_floor() or !$CoyoteTimer.is_stopped()) and Input.is_action_just_pressed("jump"):
 		velocity.y = JUMP_VELOCITY
 		sprinting_before_jump = sprinting
