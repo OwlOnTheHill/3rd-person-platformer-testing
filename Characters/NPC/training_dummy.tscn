@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bmve7pc6dgeuo"]
+
+[ext_resource type="Script" uid="uid://dtnf7d8nbq4m1" path="res://Characters/NPC/training_dummy.gd" id="1_c2g3c"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w4js7"]
+albedo_color = Color(1, 0.2627451, 0.12941177, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_7knb0"]
+material = SubResource("StandardMaterial3D_w4js7")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_a3bbp"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yb3ki"]
+
+[node name="TrainingDummy" type="StaticBody3D" unique_id=2085974718]
+script = ExtResource("1_c2g3c")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=113036237]
+mesh = SubResource("CapsuleMesh_7knb0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1468821876]
+shape = SubResource("CapsuleShape3D_a3bbp")
+
+[node name="Hurtbox" type="Area3D" parent="." unique_id=121243504]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox" unique_id=1722498763]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_yb3ki")

@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c45iwsn7bhknu" path="res://UI/Scenes/pause_menu.tscn" id="1_6wt81"]
 [ext_resource type="Script" uid="uid://b06es5foryokm" path="res://Scripts/Systems/game.gd" id="1_m3wt0"]
 [ext_resource type="PackedScene" uid="uid://br3x87lkwi67m" path="res://Characters/Player/Player.tscn" id="1_vcukt"]
+[ext_resource type="PackedScene" uid="uid://bmve7pc6dgeuo" path="res://Characters/NPC/training_dummy.tscn" id="4_of6x0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6wt81"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -72,3 +73,6 @@ shape = SubResource("ConvexPolygonShape3D_of6x0")
 
 [node name="Player" parent="." unique_id=1454809477 instance=ExtResource("1_vcukt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
+
+[node name="TrainingDummy" parent="." unique_id=2085974718 instance=ExtResource("4_of6x0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7024074, 1.1587301, -7.5526485)

@@ -15,6 +15,8 @@ albedo_color = Color(0.152941, 1, 1, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5ixxa"]
 albedo_color = Color(1, 0.345098, 0.113725, 1)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_aj84o"]
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xhfnw"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_0rwas"]
@@ -36,6 +38,20 @@ transform = Transform3D(0.5, 0, 0, 0, -4.37114e-09, -0.5, 0, 0.1, -2.18557e-08, 
 mesh = SubResource("CylinderMesh_dewec")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_5ixxa")
+
+[node name="WeaponAnchor" type="Node3D" parent="MeshInstance3D" unique_id=1365665816]
+visible = false
+
+[node name="CSGBox3D" type="CSGBox3D" parent="MeshInstance3D/WeaponAnchor" unique_id=1140525802]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3622676, 0.505154, -0.58721477)
+size = Vector3(0.1, 1, 0.2)
+
+[node name="Hitbox" type="Area3D" parent="MeshInstance3D/WeaponAnchor/CSGBox3D" unique_id=1152741856]
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" unique_id=852963344]
+transform = Transform3D(0.1, 0, 0, 0, 1, 0, 0, 0, 0.2, 0, 0, 0)
+shape = SubResource("BoxShape3D_aj84o")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2091820100]
 shape = SubResource("CapsuleShape3D_xhfnw")
@@ -59,3 +75,5 @@ spring_arm = NodePath("../SpringArm3D/SpringPosition")
 [node name="CoyoteTimer" type="Timer" parent="." unique_id=859115569]
 wait_time = 0.15
 one_shot = true
+
+[connection signal="area_entered" from="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" to="." method="_on_hitbox_area_entered"]

@@ -9,13 +9,17 @@ var jumped_on = false : set = set_jumped_on
 func set_jumped_on(value):
 	jumped_on = value
 
+@onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
+@onready var weapon_anchor = $MeshInstance3D/WeaponAnchor
 @onready var raycast = $MeshInstance3D/RayCast3D
 @export var camera: Camera3D
 @export var rotation_speed: float = 18.0
 
+var is_combat_mode = false
 var last_collided_wall: Node3D = null
 var sprinting_before_jump = false
 var was_on_floor = false
+var is_attacking = false
 
 func _ready() -> void:
 	pass
@@ -34,6 +38,12 @@ func _physics_process(delta: float) -> void:
 	
 	was_on_floor = is_on_floor()
 	
+	if Input.is_action_just_pressed("equip"):
+		toggle_weapon()
+	
+	if Input.is_action_just_pressed("attack") and is_combat_mode and not is_attacking:
+		attack()
+	
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var camera_basis = $SpringArmPivot.transform.basis
 	
@@ -46,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	right_direction = right_direction.normalized()
 	
 	var direction = (forward_direction * input_dir.y + right_direction * input_dir.x).normalized()
-
+	
 	# Smooth Mesh Rotation
 	if input_dir != Vector2.ZERO:
 		var target_rotation = $SpringArmPivot.rotation.y - input_dir.angle() - deg_to_rad(90)
@@ -96,3 +106,32 @@ func _physics_process(delta: float) -> void:
 	if (is_on_floor() or !$CoyoteTimer.is_stopped()) and Input.is_action_just_pressed("jump"):
 		velocity.y = JUMP_VELOCITY
 		sprinting_before_jump = sprinting
+	
+func toggle_weapon():
+	is_combat_mode = !is_combat_mode
+	weapon_anchor.visible = is_combat_mode
+
+func attack():
+	is_attacking = true
+	hitbox.monitoring = true
+	
+	#create the tween
+	var tween = create_tween()
+	
+	# 1. swing forward (rotate anchor) the end number is duration in seconds then the set trans and set ease makes swing start slow and finish fast for realism/weight
+	tween.tween_property(weapon_anchor, "rotation:x", deg_to_rad(-90), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
+	# 2. return to start. trans back makes return go slightly past 0 then bounce to place. The ease out starts fast and ends slow so it looks like youre bringing sword up fast and slowing back into idle
+	tween.tween_property(weapon_anchor, "rotation:x", deg_to_rad(0), 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	# 3. Reset attacking state
+	tween.finished.connect(func(): 
+		is_attacking = false
+		hitbox.monitoring = false
+	)
+
+
+func _on_hitbox_area_entered(area: Area3D) -> void:
+	# check if the thing hit has a "take_damage" function
+	if area.get_parent().has_method("take_damage"):
+		area.get_parent().take_damage(10)
