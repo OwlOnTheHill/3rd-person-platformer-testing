@@ -12,6 +12,7 @@ func set_jumped_on(value):
 
 @onready var raycast = $MeshInstance3D/RayCast3D
 @export var camera: Camera3D
+@export var rotation_speed: float = 18.0
 
 var debug_timer = 0.0
 const DEBUG_INTERVAL = 0.5
@@ -53,8 +54,16 @@ func _physics_process(delta: float) -> void:
 	var direction = (forward_direction * input_dir.y + right_direction * input_dir.x).normalized()
 
 	#rotates character mesh to be oriented to movement direction
-	if input_dir != Vector2(0,0):
-		$MeshInstance3D.rotation_degrees.y = $SpringArmPivot.rotation_degrees.y - rad_to_deg(input_dir.angle()) - 90
+	if input_dir != Vector2.ZERO:
+		# Calculate the target rotation (where we WANT to face)
+		var target_rotation = $SpringArmPivot.rotation.y - input_dir.angle() - deg_to_rad(90)
+		
+		# Smoothly rotate the mesh toward that target
+		$MeshInstance3D.rotation.y = lerp_angle(
+			$MeshInstance3D.rotation.y,
+			target_rotation,
+			rotation_speed * delta
+		)
 	
 	var sprinting = Input.is_action_pressed("sprint")
 	
