@@ -1,9 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://br3x87lkwi67m"]
+[gd_scene format=3 uid="uid://br3x87lkwi67m"]
 
-[ext_resource type="Script" uid="uid://d0yh8x3jbtwic" path="res://Scripts/player.gd" id="1_xhfnw"]
-[ext_resource type="Script" uid="uid://hd6rgox38ypm" path="res://Scripts/spring_arm_pivot.gd" id="2_kpjcp"]
-[ext_resource type="Script" uid="uid://74b4jjxhk3dg" path="res://Scripts/camera_3d.gd" id="3_kne1u"]
-[ext_resource type="Script" uid="uid://bs427duvqm7ol" path="res://Scripts/ray_cast_3d.gd" id="4_e80uo"]
+[ext_resource type="Script" uid="uid://d0yh8x3jbtwic" path="res://Characters/Player/player.gd" id="1_xhfnw"]
+[ext_resource type="Script" uid="uid://hd6rgox38ypm" path="res://Scripts/Systems/spring_arm_pivot.gd" id="2_kpjcp"]
+[ext_resource type="Script" uid="uid://74b4jjxhk3dg" path="res://Scripts/Systems/camera_3d.gd" id="3_kne1u"]
+[ext_resource type="Script" uid="uid://bs427duvqm7ol" path="res://Scripts/Systems/ray_cast_3d.gd" id="4_e80uo"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_0rwas"]
 
@@ -19,40 +19,40 @@ albedo_color = Color(1, 0.345098, 0.113725, 1)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_0rwas"]
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera")]
+[node name="Player" type="CharacterBody3D" unique_id=770069292 node_paths=PackedStringArray("camera")]
 script = ExtResource("1_xhfnw")
 camera = NodePath("SpringArmPivot/Camera3D")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2031427970]
 mesh = SubResource("CapsuleMesh_0rwas")
 surface_material_override/0 = SubResource("StandardMaterial3D_dewec")
 
-[node name="RayCast3D" type="RayCast3D" parent="MeshInstance3D"]
+[node name="RayCast3D" type="RayCast3D" parent="MeshInstance3D" unique_id=353576386]
 target_position = Vector3(0, -0.9, -2)
 hit_back_faces = false
 script = ExtResource("4_e80uo")
 
-[node name="Face" type="MeshInstance3D" parent="MeshInstance3D"]
+[node name="Face" type="MeshInstance3D" parent="MeshInstance3D" unique_id=1047725597]
 transform = Transform3D(0.5, 0, 0, 0, -4.37114e-09, -0.5, 0, 0.1, -2.18557e-08, 0, 0.612195, -0.412633)
 mesh = SubResource("CylinderMesh_dewec")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_5ixxa")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2091820100]
 shape = SubResource("CapsuleShape3D_xhfnw")
 
-[node name="SpringArmPivot" type="Node3D" parent="."]
+[node name="SpringArmPivot" type="Node3D" parent="." unique_id=1180496824]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.71767, 0)
 script = ExtResource("2_kpjcp")
 min_vertical_angle = -1.48353
 
-[node name="SpringArm3D" type="SpringArm3D" parent="SpringArmPivot"]
+[node name="SpringArm3D" type="SpringArm3D" parent="SpringArmPivot" unique_id=1568951018]
 shape = SubResource("SphereShape3D_0rwas")
 spring_length = 2.5
 margin = 0.1
 
-[node name="SpringPosition" type="Node3D" parent="SpringArmPivot/SpringArm3D"]
+[node name="SpringPosition" type="Node3D" parent="SpringArmPivot/SpringArm3D" unique_id=299687164]
 
-[node name="Camera3D" type="Camera3D" parent="SpringArmPivot" node_paths=PackedStringArray("spring_arm")]
+[node name="Camera3D" type="Camera3D" parent="SpringArmPivot" unique_id=370473715 node_paths=PackedStringArray("spring_arm")]
 script = ExtResource("3_kne1u")
 spring_arm = NodePath("../SpringArm3D/SpringPosition")
