@@ -1,8 +1,109 @@
 [gd_scene format=3 uid="uid://c45iwsn7bhknu"]
 
 [ext_resource type="Script" uid="uid://yw8uge55knwt" path="res://UI/Scripts/pause_menu.gd" id="1_hdmo1"]
+[ext_resource type="Texture2D" uid="uid://del2wmt17tr03" path="res://UI/Assets/Simple Book/Open/1.png" id="2_fcbiy"]
+[ext_resource type="Texture2D" uid="uid://yj54oq1f773d" path="res://UI/Assets/Simple Book/6.png" id="2_nbq4g"]
+[ext_resource type="Texture2D" uid="uid://bs2ndux4vrda4" path="res://UI/Assets/Simple Book/Open/2.png" id="3_nbq4g"]
+[ext_resource type="Texture2D" uid="uid://6e7my71vj7yy" path="res://UI/Assets/Simple Book/Open/3.png" id="4_fvds5"]
+[ext_resource type="Texture2D" uid="uid://bhs7dq6mfv6ti" path="res://UI/Assets/Simple Book/Open/4.png" id="5_8nfxn"]
+[ext_resource type="Texture2D" uid="uid://biakcqqnqymp5" path="res://UI/Assets/Simple Book/Open/5.png" id="6_uwbqb"]
+[ext_resource type="Texture2D" uid="uid://dkuf5442ahca1" path="res://UI/Assets/Simple Book/Open/6.png" id="7_a6yvs"]
+
+[sub_resource type="Animation" id="Animation_srctp"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [null]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VBoxContainer:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_nbq4g"]
+resource_name = "close_book"
+length = 0.33333334
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06666666, 0.13333334, 0.2, 0.26666668, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [ExtResource("7_a6yvs"), ExtResource("6_uwbqb"), ExtResource("5_8nfxn"), ExtResource("4_fvds5"), ExtResource("3_nbq4g"), ExtResource("2_fcbiy")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VBoxContainer:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(-0.033333335, 0.13333336, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_1do6l"]
+resource_name = "open_book"
+length = 0.96666664
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [ExtResource("2_fcbiy"), ExtResource("3_nbq4g"), ExtResource("4_fvds5"), ExtResource("5_8nfxn"), ExtResource("6_uwbqb"), ExtResource("7_a6yvs")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VBoxContainer:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.5, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_chqln"]
+_data = {
+&"RESET": SubResource("Animation_srctp"),
+&"close_book": SubResource("Animation_nbq4g"),
+&"open_book": SubResource("Animation_1do6l")
+}
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_nbq4g"]
+load_path = "res://.godot/imported/6.png-b2ec450c8efbcbc0364355fc0300db26.ctex"
 
 [node name="PauseMenu" type="Control" unique_id=271320361]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,25 +112,58 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hdmo1")
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=245130704]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=874815145]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1.0
-offset_right = 1.0
-offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+stretch_mode = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1599915047]
-layout_mode = 2
-alignment = 1
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1490263688]
+libraries/ = SubResource("AnimationLibrary_chqln")
 
-[node name="Resume" type="Button" parent="CenterContainer/VBoxContainer" unique_id=2002616120]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1599915047]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 678.0
+offset_top = 187.0
+offset_right = 764.0
+offset_bottom = 512.0
+
+[node name="Resume" type="TextureButton" parent="VBoxContainer" unique_id=2386062]
 layout_mode = 2
+texture_normal = SubResource("CompressedTexture2D_nbq4g")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="VBoxContainer/Resume" unique_id=831891304]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.67700005
+anchor_top = 0.11100001
+anchor_right = 1.6480001
+anchor_bottom = 0.81900007
+offset_left = 58.221985
+offset_top = 0.00399971
+offset_right = -55.728027
+offset_bottom = 2.515997
+grow_horizontal = 2
+grow_vertical = 2
 text = "Resume"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Quit" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1320406326]
+[node name="Quit" type="TextureButton" parent="VBoxContainer" unique_id=811232228]
 layout_mode = 2
+texture_normal = ExtResource("2_nbq4g")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="VBoxContainer/Quit" unique_id=935500718]
+layout_mode = 0
+offset_top = 1.0
+offset_right = 86.0
+offset_bottom = 33.0
 text = "Quit"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -10,9 +10,10 @@ func _process(_delta):
 func pauseMenu():
 	if paused:
 		pause_menu.hide()
-		Engine.time_scale = 1
+		get_tree().paused = false
 	else:
 		pause_menu.show()
-		Engine.time_scale = 0
+		pause_menu.get_node("AnimationPlayer").play("open_book")
+		get_tree().paused = true
 	
 	paused = !paused
