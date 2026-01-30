@@ -2,12 +2,17 @@
 
 [ext_resource type="Script" uid="uid://yw8uge55knwt" path="res://UI/Scripts/pause_menu.gd" id="1_hdmo1"]
 [ext_resource type="Texture2D" uid="uid://del2wmt17tr03" path="res://UI/Assets/Simple Book/Open/1.png" id="2_fcbiy"]
+[ext_resource type="Shader" uid="uid://bgqfij56i3n4g" path="res://UI/Scripts/blur.gdshader" id="2_fvds5"]
 [ext_resource type="Texture2D" uid="uid://yj54oq1f773d" path="res://UI/Assets/Simple Book/6.png" id="2_nbq4g"]
 [ext_resource type="Texture2D" uid="uid://bs2ndux4vrda4" path="res://UI/Assets/Simple Book/Open/2.png" id="3_nbq4g"]
 [ext_resource type="Texture2D" uid="uid://6e7my71vj7yy" path="res://UI/Assets/Simple Book/Open/3.png" id="4_fvds5"]
 [ext_resource type="Texture2D" uid="uid://bhs7dq6mfv6ti" path="res://UI/Assets/Simple Book/Open/4.png" id="5_8nfxn"]
 [ext_resource type="Texture2D" uid="uid://biakcqqnqymp5" path="res://UI/Assets/Simple Book/Open/5.png" id="6_uwbqb"]
 [ext_resource type="Texture2D" uid="uid://dkuf5442ahca1" path="res://UI/Assets/Simple Book/Open/6.png" id="7_a6yvs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8nfxn"]
+shader = ExtResource("2_fvds5")
+shader_parameter/lod = 2.0
 
 [sub_resource type="Animation" id="Animation_srctp"]
 length = 0.001
@@ -111,6 +116,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hdmo1")
+
+[node name="BackgroundDim" type="ColorRect" parent="." unique_id=1274057765]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.50980395)
+
+[node name="BackgroundBlur" type="ColorRect" parent="." unique_id=1699030132]
+material = SubResource("ShaderMaterial_8nfxn")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.47058824)
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=874815145]
 layout_mode = 1
