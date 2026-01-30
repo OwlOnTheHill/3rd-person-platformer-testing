@@ -20,6 +20,7 @@ func set_jumped_on(value):
 @onready var raycast = $MeshInstance3D/RayCast3D
 @export var camera: Camera3D
 @export var rotation_speed: float = 18.0
+@export var max_lock_distance: float = 24.0
 
 var is_combat_mode = false
 var last_collided_wall: Node3D = null
@@ -305,11 +306,13 @@ func toggle_lock_on():
 	if is_locked_on:
 		is_locked_on = false
 		locked_target = null
+		$SpringArmPivot.locked_target = null
 	else:
 		var target = find_closest_target()
 		if target:
 			locked_target = target
 			is_locked_on = true
+			$SpringArmPivot.locked_target = target
 
 func look_at_target(delta: float):
 	if locked_target:
@@ -323,3 +326,8 @@ func look_at_target(delta: float):
 		
 		# Smoothly rotate the MeshInstance3D toward that direction
 		$MeshInstance3D.global_basis = $MeshInstance3D.global_basis.slerp(target_basis, rotation_speed * delta)
+		
+		if is_locked_on and locked_target:
+			var dist = global_position.distance_to(locked_target.global_position)
+			if dist > max_lock_distance:
+				toggle_lock_on() # This will clear the target and turn off is_locked_on
