@@ -18,6 +18,7 @@ func set_jumped_on(value):
 @onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
 @onready var weapon_anchor = $MeshInstance3D/WeaponAnchor
 @onready var raycast = $MeshInstance3D/RayCast3D
+@onready var reticle = $Reticle
 @export var camera: Camera3D
 @export var rotation_speed: float = 18.0
 @export var max_lock_distance: float = 24.0
@@ -29,9 +30,45 @@ var was_on_floor = false
 var is_attacking = false
 var locked_target: Node3D = null
 var is_locked_on: bool = false
+var reticle_tween: Tween
 
 func _ready() -> void:
-	pass
+	# If we forgot to assign the camera in the inspector, try to find it
+	if camera == null:
+		camera = get_viewport().get_camera_3d()
+
+
+
+func _process(_delta: float) -> void:
+	if is_locked_on and locked_target:
+		# Show the reticle
+		reticle.visible = true
+		
+		# Start animation if not running
+		if reticle_tween == null or not reticle_tween.is_running():
+			start_reticle_throb()
+		
+		# Handle Fade Logic
+		if is_line_of_sight_clear(locked_target):
+			reticle.modulate.a = 1.0
+		else:
+			reticle.modulate.a = 0.4
+		
+		# Get the enemy's 3D position (offset slightly for the chest)
+		var target_pos = locked_target.global_position + Vector3(0, 0.6, 0)
+		
+		# Convert 3D position to 2D screen coordinates
+		var screen_pos = camera.unproject_position(target_pos)
+		
+		# Move the UI element to that position
+		reticle.position = screen_pos - (reticle.size / 2) # Center the X on the target
+	else:
+		# Hide it when not locked on
+		reticle.visible = false
+		
+		if reticle_tween:
+			reticle_tween.kill() # stop animation when lock on is lost
+			reticle.scale = Vector2.ONE # reset size
 
 
 
@@ -175,8 +212,9 @@ func handle_jump_state(delta: float):
 	if is_on_floor():
 		change_state(State.IDLE)
 	
-	# Mesh Rotation (Your original smooth lerp math)
-	if input_dir != Vector2.ZERO:
+	if is_locked_on:
+		look_at_target(delta)
+	elif input_dir != Vector2.ZERO:
 		var target_rotation = $SpringArmPivot.rotation.y - input_dir.angle() - deg_to_rad(90)
 		$MeshInstance3D.rotation.y = lerp_angle($MeshInstance3D.rotation.y, target_rotation, rotation_speed * delta)
 
@@ -288,6 +326,11 @@ func _on_hitbox_area_entered(area: Area3D) -> void:
 		area.get_parent().take_damage(10, global_position)
 
 func find_closest_target():
+	# Safety Check: if no camera, cant check frustum
+	if camera == null:
+		print("Error: No camera assigned to player!")
+		return null
+	
 	var targets = $LockOnArea.get_overlapping_bodies()
 	var closest_target = null
 	var min_dist = INF
@@ -295,6 +338,14 @@ func find_closest_target():
 	for target in targets:
 		# check if its a valid target
 		if target.has_method("take_damage") and target != self:
+			# 1. Camera Visibility: can I actually see target
+			if not camera.is_position_in_frustum(target.global_position):
+				continue
+			
+			# Wall Check. Is there a solid object between
+			if not is_line_of_sight_clear(target):
+				continue
+			
 			var dist = global_position.distance_to(target.global_position)
 			if dist < min_dist:
 				min_dist = dist
@@ -331,3 +382,29 @@ func look_at_target(delta: float):
 			var dist = global_position.distance_to(locked_target.global_position)
 			if dist > max_lock_distance:
 				toggle_lock_on() # This will clear the target and turn off is_locked_on
+
+func is_line_of_sight_clear(target: Node3D) -> bool:
+	var space_state = get_world_3d().direct_space_state
+	
+	# We cast a ray from the camera's position to the enemy's center
+	var query = PhysicsRayQueryParameters3D.create(
+		camera.global_position, 
+		target.global_position + Vector3(0, 0.6, 0) # Aim for the chest
+	)
+	
+	# Ignore the player so the ray doesn't hit your own back
+	query.exclude = [get_rid()] 
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		# If the first thing the ray hits is our target, the path is clear
+		return result.collider == target
+	
+	return false
+
+func start_reticle_throb():
+	reticle_tween = create_tween().set_loops() # Infinite loop
+	# Scale up to 120% size over 0.5 seconds
+	reticle_tween.tween_property(reticle, "scale", Vector2(1.2, 1.2), 0.5).set_trans(Tween.TRANS_SINE)
+	# Scale back to 100% size over 0.5 seconds
+	reticle_tween.tween_property(reticle, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE)

@@ -54,5 +54,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("pause"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			if owner.has_node("Reticle"):
+				owner.get_node("Reticle").hide()
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
