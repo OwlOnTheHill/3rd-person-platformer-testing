@@ -1,5 +1,46 @@
 extends StaticBody3D
 
-func take_damage(amount: int):
-	print("Dummy took ", amount, " damage!")
+@onready var mesh = $MeshInstance3D
+var damage_node = preload("res://Scenes/damage_number.tscn")
+
+var active_damage_label: Label3D = null
+var current_damage_sum: int = 0
+
+func take_damage(amount: int, source_pos: Vector3):
+	# 1. Handle Recoil
+	var knockback_dir = (global_position - source_pos).normalized()
+	recoil(knockback_dir)
 	
+	# The "Reset" Logic
+	# If the label doesn't exist anymore, it means the previous combo ended.
+	if not is_instance_valid(active_damage_label):
+		current_damage_sum = 0
+		active_damage_label = null
+
+	# 3. Add to the total damage "stack"
+	current_damage_sum += amount
+	
+	if active_damage_label == null:
+		active_damage_label = damage_node.instantiate()
+		get_parent().add_child(active_damage_label)
+		# Place it once and NEVER change this position again. Use middle number to adjust number spawn point
+		active_damage_label.global_position = global_position + Vector3(0, 0.6, 0)
+	
+	active_damage_label.set_number(current_damage_sum)
+	active_damage_label.reset_timer()
+
+func recoil(dir: Vector3):
+	var tween = create_tween()
+	
+	# We want to tilt the TOP of the dummy away from the hit.
+	# We'll calculate a target rotation based on the direction vector.
+	# Multiplying by 0.3 (roughly 17 degrees) for a subtle tilt.
+	var target_rotation = Vector3(dir.z * 0.6, 0, -dir.x * 0.6)
+	
+	# Tilt away
+	tween.tween_property(mesh, "rotation", target_rotation, 0.05)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	# Bounce back to original (0,0,0)
+	tween.tween_property(mesh, "rotation", Vector3.ZERO, 0.5)\
+		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)

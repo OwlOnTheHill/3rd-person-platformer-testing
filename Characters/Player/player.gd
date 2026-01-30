@@ -134,4 +134,4 @@ func attack():
 func _on_hitbox_area_entered(area: Area3D) -> void:
 	# check if the thing hit has a "take_damage" function
 	if area.get_parent().has_method("take_damage"):
-		area.get_parent().take_damage(10)
+		area.get_parent().take_damage(10, global_position) #takes 10 dmg and sends current position to dummy so it flinches away no matter which side I attack from

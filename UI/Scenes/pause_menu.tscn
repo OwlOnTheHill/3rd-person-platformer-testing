@@ -66,7 +66,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_1do6l"]
 resource_name = "open_book"
-length = 0.96666664
+length = 0.6333333
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -74,7 +74,7 @@ tracks/0/path = NodePath("TextureRect:texture")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"times": PackedFloat32Array(0, 0.06666667, 0.13333334, 0.2, 0.26666668, 0.33333334),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [ExtResource("2_fcbiy"), ExtResource("3_nbq4g"), ExtResource("4_fvds5"), ExtResource("5_8nfxn"), ExtResource("6_uwbqb"), ExtResource("7_a6yvs")]
@@ -86,7 +86,7 @@ tracks/1/path = NodePath("VBoxContainer:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.4, 0.5, 0.6),
+"times": PackedFloat32Array(0, 0.23333333, 0.26666668, 0.46666667),
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
