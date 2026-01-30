@@ -108,6 +108,9 @@ func _physics_process(delta: float) -> void:
 	# Wall collision reset logic (your raycast logic)
 	handle_wall_detection()
 	
+	if is_on_floor():
+		jumped_on = false
+		last_collided_wall = null
 	# Update this for next frame
 	was_on_floor = is_on_floor()
 
@@ -123,8 +126,9 @@ func handle_idle_state(_delta: float):
 		change_state(State.MOVE)
 		
 	if Input.is_action_just_pressed("jump"):
-		sprinting_before_jump = false # No sprint boost from standstill
-		change_state(State.JUMP)
+		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
+			sprinting_before_jump = false # No sprint boost from standstill
+			change_state(State.JUMP)
 		
 	if Input.is_action_just_pressed("attack") and is_combat_mode and not is_attacking:
 		change_state(State.ATTACK)
@@ -148,17 +152,15 @@ func handle_move_state(delta: float):
 		change_state(State.IDLE)
 	
 	if Input.is_action_just_pressed("jump"):
-		sprinting_before_jump = Input.is_action_pressed("sprint")
-		
-		# THE FIX: If we are touching a wall while jumping off the ground, 
-		# mark it as 'used' immediately so we can't double-jump off it.
-		if raycast.is_colliding():
-			last_collided_wall = raycast.get_collider()
-			jumped_on = true # This forces the player to find a NEW wall or look away
-		else:
-			jumped_on = false
+		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
+			sprinting_before_jump = Input.is_action_pressed("sprint")
+			if raycast.is_colliding():
+				last_collided_wall = raycast.get_collider()
+				jumped_on = true # This forces the player to find a NEW wall or look away
+			else:
+				jumped_on = false
 			
-		change_state(State.JUMP)
+			change_state(State.JUMP)
 		
 	if Input.is_action_just_pressed("attack") and is_combat_mode and not is_attacking:
 		change_state(State.ATTACK)
@@ -204,10 +206,10 @@ func handle_jump_state(delta: float):
 	if is_on_floor():
 		change_state(State.IDLE)
 	
-	# Wall Jump logic from your original code
-	if Input.is_action_just_pressed("jump") and not jumped_on and raycast.is_colliding():
-		velocity.y = JUMP_VELOCITY
-		jumped_on = true
+	if Input.is_action_just_pressed("jump"):
+		if not jumped_on and raycast.is_colliding():
+			velocity.y = JUMP_VELOCITY
+			jumped_on = true
 	
 	if is_on_floor():
 		change_state(State.IDLE)
@@ -258,7 +260,8 @@ func handle_combat_idle_state(delta: float):
 		change_state(State.COMBAT_MOVE)
 	
 	if Input.is_action_just_pressed("jump"):
-		change_state(State.JUMP)
+		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
+			change_state(State.JUMP)
 
 	if Input.is_action_just_pressed("attack") and is_combat_mode:
 		change_state(State.ATTACK)
@@ -281,7 +284,8 @@ func handle_combat_move_state(delta: float):
 		change_state(State.COMBAT_IDLE)
 		
 	if Input.is_action_just_pressed("jump"):
-		change_state(State.JUMP)
+		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
+			change_state(State.JUMP)
 
 	if Input.is_action_just_pressed("attack") and is_combat_mode:
 		change_state(State.ATTACK)
@@ -313,8 +317,7 @@ func handle_wall_detection():
 			jumped_on = false
 			last_collided_wall = current_collided_wall
 	else:
-		# If we aren't looking at any wall, clear the last wall reference
-		last_collided_wall = null
+		pass
 
 func change_state(new_state: State):
 	current_state = new_state
