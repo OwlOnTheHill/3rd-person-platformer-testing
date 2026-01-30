@@ -21,6 +21,8 @@ albedo_color = Color(1, 0.345098, 0.113725, 1)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_0rwas"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_aj84o"]
+
 [node name="Player" type="CharacterBody3D" unique_id=770069292]
 script = ExtResource("1_xhfnw")
 
@@ -75,5 +77,11 @@ spring_arm = NodePath("../SpringArm3D/SpringPosition")
 [node name="CoyoteTimer" type="Timer" parent="." unique_id=859115569]
 wait_time = 0.15
 one_shot = true
+
+[node name="LockOnArea" type="Area3D" parent="." unique_id=2085065046]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LockOnArea" unique_id=1600693194]
+transform = Transform3D(24, 0, 0, 0, 24, 0, 0, 0, 24, 0, 0, 0)
+shape = SubResource("SphereShape3D_aj84o")
 
 [connection signal="area_entered" from="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" to="." method="_on_hitbox_area_entered"]

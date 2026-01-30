@@ -26,9 +26,13 @@ var last_collided_wall: Node3D = null
 var sprinting_before_jump = false
 var was_on_floor = false
 var is_attacking = false
+var locked_target: Node3D = null
+var is_locked_on: bool = false
 
 func _ready() -> void:
 	pass
+
+
 
 func _physics_process(delta: float) -> void:
 	# 1. Logic that runs EVERY frame regardless of state
@@ -37,13 +41,24 @@ func _physics_process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("equip"):
 		toggle_weapon()
+	
+	if Input.is_action_just_pressed("lock_on"):
+		toggle_lock_on()
 
 	# 2. State Switcher: Only runs the code for our current mode
 	match current_state:
 		State.IDLE:
-			handle_idle_state(delta)
+			if is_locked_on: change_state(State.COMBAT_IDLE)
+			else: handle_idle_state(delta)
 		State.MOVE:
-			handle_move_state(delta)
+			if is_locked_on: change_state(State.COMBAT_MOVE)
+			else: handle_move_state(delta)
+		State.COMBAT_IDLE:
+			if not is_locked_on: change_state(State.IDLE)
+			else: handle_combat_idle_state(delta)
+		State.COMBAT_MOVE:
+			if not is_locked_on: change_state(State.MOVE)
+			else: handle_combat_move_state(delta)
 		State.JUMP:
 			handle_jump_state(delta)
 		State.ATTACK:
@@ -195,6 +210,45 @@ func execute_attack_animation():
 
 
 
+func handle_combat_idle_state(delta: float):
+	# Face the target
+	look_at_target(delta)
+	
+	# Transitions
+	if Input.get_vector("move_left", "move_right", "move_forward", "move_back") != Vector2.ZERO:
+		change_state(State.COMBAT_MOVE)
+	
+	if Input.is_action_just_pressed("jump"):
+		change_state(State.JUMP)
+
+	if Input.is_action_just_pressed("attack") and is_combat_mode:
+		change_state(State.ATTACK)
+
+
+
+func handle_combat_move_state(delta: float):
+	look_at_target(delta)
+	
+	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var camera_basis = $SpringArmPivot.transform.basis
+	var direction = (camera_basis.z * input_dir.y + camera_basis.x * input_dir.x).normalized()
+	direction.y = 0
+	
+	velocity.x = direction.x * SPEED
+	velocity.z = direction.z * SPEED
+	
+	# Transitions
+	if input_dir == Vector2.ZERO:
+		change_state(State.COMBAT_IDLE)
+		
+	if Input.is_action_just_pressed("jump"):
+		change_state(State.JUMP)
+
+	if Input.is_action_just_pressed("attack") and is_combat_mode:
+		change_state(State.ATTACK)
+
+
+
 func toggle_weapon():
 	is_combat_mode = !is_combat_mode
 	weapon_anchor.visible = is_combat_mode
@@ -227,8 +281,45 @@ func change_state(new_state: State):
 	current_state = new_state
 	state_just_changed = true
 
-
 func _on_hitbox_area_entered(area: Area3D) -> void:
 	# This reaches out to dummy script
 	if area.get_parent().has_method("take_damage"):
 		area.get_parent().take_damage(10, global_position)
+
+func find_closest_target():
+	var targets = $LockOnArea.get_overlapping_bodies()
+	var closest_target = null
+	var min_dist = INF
+	
+	for target in targets:
+		# check if its a valid target
+		if target.has_method("take_damage") and target != self:
+			var dist = global_position.distance_to(target.global_position)
+			if dist < min_dist:
+				min_dist = dist
+				closest_target = target
+	
+	return closest_target
+
+func toggle_lock_on():
+	if is_locked_on:
+		is_locked_on = false
+		locked_target = null
+	else:
+		var target = find_closest_target()
+		if target:
+			locked_target = target
+			is_locked_on = true
+
+func look_at_target(delta: float):
+	if locked_target:
+		# Get the direction to the target
+		var pos = locked_target.global_position
+		pos.y = global_position.y # Keep rotation on the horizontal plane
+		
+		# Create a look-at transform
+		var target_dir = global_position.direction_to(pos)
+		var target_basis = Basis.looking_at(target_dir)
+		
+		# Smoothly rotate the MeshInstance3D toward that direction
+		$MeshInstance3D.global_basis = $MeshInstance3D.global_basis.slerp(target_basis, rotation_speed * delta)
