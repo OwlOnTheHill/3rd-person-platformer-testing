@@ -82,6 +82,9 @@ func _physics_process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("lock_on"):
 		toggle_lock_on()
+	
+	if Input.is_action_just_pressed("interact"):
+		try_interact()
 
 	# 2. State Switcher: Only runs the code for our current mode
 	match current_state:
@@ -411,3 +414,12 @@ func start_reticle_throb():
 	reticle_tween.tween_property(reticle, "scale", Vector2(1.2, 1.2), 0.5).set_trans(Tween.TRANS_SINE)
 	# Scale back to 100% size over 0.5 seconds
 	reticle_tween.tween_property(reticle, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE)
+
+func try_interact():
+	# We check for Area3Ds because our buttons will be Area3Ds
+	var overlapping_areas = $InteractionArea.get_overlapping_areas()
+	
+	for area in overlapping_areas:
+		if area.has_method("interact"):
+			area.interact()
+			return # Interact with only one thing at a time

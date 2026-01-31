@@ -17,12 +17,17 @@ albedo_color = Color(0.152941, 1, 1, 1)
 albedo_color = Color(1, 0.345098, 0.113725, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_aj84o"]
+size = Vector3(0.1, 1, 0.2)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xhfnw"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_0rwas"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aj84o"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_oc658"]
+height = 3.0
+radius = 1.5
 
 [node name="Player" type="CharacterBody3D" unique_id=770069292 node_paths=PackedStringArray("camera")]
 script = ExtResource("1_xhfnw")
@@ -54,7 +59,6 @@ size = Vector3(0.1, 1, 0.2)
 monitoring = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" unique_id=852963344]
-transform = Transform3D(0.1, 0, 0, 0, 1, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("BoxShape3D_aj84o")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2091820100]
@@ -88,5 +92,10 @@ shape = SubResource("SphereShape3D_aj84o")
 
 [node name="Reticle" parent="." unique_id=485448268 instance=ExtResource("5_oc658")]
 process_mode = 3
+
+[node name="InteractionArea" type="Area3D" parent="." unique_id=638654974]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=1545707210]
+shape = SubResource("CylinderShape3D_oc658")
 
 [connection signal="area_entered" from="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" to="." method="_on_hitbox_area_entered"]

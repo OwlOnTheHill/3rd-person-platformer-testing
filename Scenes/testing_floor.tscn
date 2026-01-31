@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://b06es5foryokm" path="res://Scripts/Systems/game.gd" id="1_m3wt0"]
 [ext_resource type="PackedScene" uid="uid://br3x87lkwi67m" path="res://Characters/Player/Player.tscn" id="1_vcukt"]
 [ext_resource type="PackedScene" uid="uid://bmve7pc6dgeuo" path="res://Characters/NPC/training_dummy.tscn" id="4_of6x0"]
+[ext_resource type="PackedScene" uid="uid://b2bjij4b2veo8" path="res://Scenes/Interactables/button_interactable.tscn" id="5_7c0i0"]
+[ext_resource type="PackedScene" uid="uid://dxgpqxrbn1cuy" path="res://Scenes/Interactables/moving_platform.tscn" id="6_ds1wg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6wt81"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -76,3 +78,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
 
 [node name="TrainingDummy" parent="." unique_id=2085974718 instance=ExtResource("4_of6x0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7024074, 1.1587301, -7.5526485)
+
+[node name="ButtonInteractable" parent="." unique_id=1866162135 instance=ExtResource("5_7c0i0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.642245, 0.042643785, -8.521597)
+
+[node name="Anchor" parent="." unique_id=258147943 instance=ExtResource("6_ds1wg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.622174, -0.24621439, -8.528757)
+
+[connection signal="interact_triggered" from="ButtonInteractable" to="Anchor/MovingPlatform" method="activate_platform"]
+
+[editable path="Anchor"]
