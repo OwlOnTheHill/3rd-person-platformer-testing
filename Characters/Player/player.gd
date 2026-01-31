@@ -15,6 +15,7 @@ var jumped_on = false : set = set_jumped_on
 func set_jumped_on(value):
 	jumped_on = value
 
+@onready var interact_label = $HUD/InteractLabel
 @onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
 @onready var weapon_anchor = $MeshInstance3D/WeaponAnchor
 @onready var raycast = $MeshInstance3D/RayCast3D
@@ -69,6 +70,15 @@ func _process(_delta: float) -> void:
 		if reticle_tween:
 			reticle_tween.kill() # stop animation when lock on is lost
 			reticle.scale = Vector2.ONE # reset size
+	
+	# NEW: Check for interactables to show UI
+	var interactable = get_valid_interactable()
+	
+	if interactable:
+		interact_label.visible = true
+		interact_label.text = "Press F to Interact"
+	else:
+		interact_label.visible = false
 
 
 
@@ -416,10 +426,22 @@ func start_reticle_throb():
 	reticle_tween.tween_property(reticle, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE)
 
 func try_interact():
-	# We check for Area3Ds because our buttons will be Area3Ds
+	var item = get_valid_interactable()
+	if item:
+		item.interact()
+
+func get_valid_interactable():
 	var overlapping_areas = $InteractionArea.get_overlapping_areas()
+	
+	var closest_item = null
+	var closest_distance = INF
 	
 	for area in overlapping_areas:
 		if area.has_method("interact"):
-			area.interact()
-			return # Interact with only one thing at a time
+			var dist = global_position.distance_to(area.global_position)
+			
+			if dist < closest_distance:
+				closest_distance = dist
+				closest_item = area
+	
+	return closest_item

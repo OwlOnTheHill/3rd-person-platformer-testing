@@ -98,4 +98,22 @@ process_mode = 3
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=1545707210]
 shape = SubResource("CylinderShape3D_oc658")
 
+[node name="HUD" type="CanvasLayer" parent="." unique_id=684450661]
+
+[node name="InteractLabel" type="Label" parent="HUD" unique_id=1386567493]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -0.5
+offset_top = -93.0
+offset_right = 0.5
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+
 [connection signal="area_entered" from="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" to="." method="_on_hitbox_area_entered"]
