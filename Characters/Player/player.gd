@@ -15,6 +15,7 @@ var jumped_on = false : set = set_jumped_on
 func set_jumped_on(value):
 	jumped_on = value
 
+@onready var swing_audio = $MeshInstance3D/WeaponAnchor/SwingAudio
 @onready var interact_label = $HUD/InteractLabel
 @onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
 @onready var weapon_anchor = $MeshInstance3D/WeaponAnchor
@@ -249,6 +250,10 @@ func handle_attack_state(_delta: float):
 func execute_attack_animation():
 	is_attacking = true
 	hitbox.monitoring = true
+	
+	# Play sound with random pitch for variety
+	swing_audio.pitch_scale = randf_range(0.9, 1.1)
+	swing_audio.play()
 	
 	var tween = create_tween()
 	# Swing forward

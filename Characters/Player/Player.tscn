@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d0yh8x3jbtwic" path="res://Characters/Player/player.gd" id="1_xhfnw"]
 [ext_resource type="Script" uid="uid://hd6rgox38ypm" path="res://Scripts/Systems/spring_arm_pivot.gd" id="2_kpjcp"]
+[ext_resource type="AudioStream" uid="uid://b75e68cmggag" path="res://Audio/SFX/swipe.wav" id="3_11ham"]
 [ext_resource type="Script" uid="uid://74b4jjxhk3dg" path="res://Scripts/Systems/camera_3d.gd" id="3_kne1u"]
 [ext_resource type="Script" uid="uid://bs427duvqm7ol" path="res://Scripts/Systems/ray_cast_3d.gd" id="4_e80uo"]
 [ext_resource type="PackedScene" uid="uid://7j3k73we3xp3" path="res://Scenes/reticle.tscn" id="5_oc658"]
@@ -60,6 +61,10 @@ monitoring = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" unique_id=852963344]
 shape = SubResource("BoxShape3D_aj84o")
+
+[node name="SwingAudio" type="AudioStreamPlayer3D" parent="MeshInstance3D/WeaponAnchor" unique_id=795951429]
+stream = ExtResource("3_11ham")
+max_distance = 10.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2091820100]
 shape = SubResource("CapsuleShape3D_xhfnw")

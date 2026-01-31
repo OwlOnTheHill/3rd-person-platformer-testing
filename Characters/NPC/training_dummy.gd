@@ -1,5 +1,6 @@
 extends StaticBody3D
 
+@onready var impact_audio = $ImpactAudio
 @onready var mesh = $MeshInstance3D
 var damage_node = preload("res://Scenes/damage_number.tscn")
 
@@ -12,6 +13,10 @@ func take_damage(amount: int, source_pos: Vector3):
 	# 1. Handle Recoil
 	var knockback_dir = (global_position - source_pos).normalized()
 	recoil(knockback_dir)
+	
+	# Play impact sound
+	impact_audio.pitch_scale = randf_range(0.8, 1.2) # High variation makes hits feel messy/brutal
+	impact_audio.play()
 	
 	flash()
 	
