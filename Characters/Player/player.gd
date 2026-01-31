@@ -34,6 +34,7 @@ var locked_target: Node3D = null
 var is_locked_on: bool = false
 var reticle_tween: Tween
 var particle_scene = preload("res://Scenes/VFX/hit_particles.tscn")
+var already_hit_targets = []
 
 func _ready() -> void:
 	# If we forgot to assign the camera in the inspector, try to find it
@@ -250,6 +251,7 @@ func handle_attack_state(_delta: float):
 func execute_attack_animation():
 	is_attacking = true
 	hitbox.monitoring = true
+	already_hit_targets.clear()
 	
 	# Play sound with random pitch for variety
 	swing_audio.pitch_scale = randf_range(0.9, 1.1)
@@ -343,17 +345,29 @@ func change_state(new_state: State):
 	state_just_changed = true
 
 func _on_hitbox_area_entered(area: Area3D) -> void:
-	# This reaches out to dummy script
-	if area.get_parent().has_method("take_damage"):
-		area.get_parent().take_damage(10, global_position)
+	# Get the enemy root node (the dummy)
+	var target = area.get_parent()
+	
+	# CHECK 1: Have we already hit this specific enemy with this swing?
+	if target in already_hit_targets:
+		return # Stop here! Do not damage them again.
+	
+	# CHECK 2: Is it a valid enemy?
+	if target.has_method("take_damage"):
+		# Mark them as "Hit" for this swing
+		already_hit_targets.append(target)
+		
+		# Now apply the damage and effects
+		target.take_damage(10, global_position)
 		
 		# Spawn Particles
 		var vfx = particle_scene.instantiate()
 		get_tree().root.add_child(vfx)
-		vfx.global_position = hitbox.global_position # Spawn at the sword blade
+		vfx.global_position = hitbox.global_position 
 		
-		# 0.05 scale means time moves at 5% speed (almost stopped)
-		# 0.15 duration is how long the "freeze" lasts in real time
+		# Hit Stop
+		# first number means how fast time moves by percentage
+		# second number is duration of freeze in real time in seconds so 0.1 = a tenth of a second
 		Global.hit_stop(0.05, 0.1)
 
 func find_closest_target():
