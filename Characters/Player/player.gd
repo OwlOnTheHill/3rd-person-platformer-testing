@@ -32,6 +32,7 @@ var is_attacking = false
 var locked_target: Node3D = null
 var is_locked_on: bool = false
 var reticle_tween: Tween
+var particle_scene = preload("res://Scenes/VFX/hit_particles.tscn")
 
 func _ready() -> void:
 	# If we forgot to assign the camera in the inspector, try to find it
@@ -341,10 +342,14 @@ func _on_hitbox_area_entered(area: Area3D) -> void:
 	if area.get_parent().has_method("take_damage"):
 		area.get_parent().take_damage(10, global_position)
 		
-		# NEW: Freeze time! 
+		# Spawn Particles
+		var vfx = particle_scene.instantiate()
+		get_tree().root.add_child(vfx)
+		vfx.global_position = hitbox.global_position # Spawn at the sword blade
+		
 		# 0.05 scale means time moves at 5% speed (almost stopped)
 		# 0.15 duration is how long the "freeze" lasts in real time
-		Global.hit_stop(0.05, 0.15)
+		Global.hit_stop(0.05, 0.1)
 
 func find_closest_target():
 	# Safety Check: if no camera, cant check frustum
