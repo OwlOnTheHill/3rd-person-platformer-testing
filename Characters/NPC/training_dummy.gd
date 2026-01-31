@@ -9,6 +9,9 @@ var current_damage_sum: int = 0
 
 var flash_mat = preload("res://Materials/flash_material.tres")
 
+func _ready() -> void:
+	add_to_group("Enemy")
+
 func take_damage(amount: int, source_pos: Vector3):
 	# 1. Handle Recoil
 	var knockback_dir = (global_position - source_pos).normalized()

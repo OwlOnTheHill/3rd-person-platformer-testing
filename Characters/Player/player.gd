@@ -15,6 +15,8 @@ var jumped_on = false : set = set_jumped_on
 func set_jumped_on(value):
 	jumped_on = value
 
+@onready var fury_bar_1 = $HUD/VBoxContainer/Fury1
+@onready var fury_bar_2 = $HUD/VBoxContainer/Fury2
 @onready var swing_audio = $MeshInstance3D/WeaponAnchor/SwingAudio
 @onready var interact_label = $HUD/InteractLabel
 @onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
@@ -35,6 +37,11 @@ var is_locked_on: bool = false
 var reticle_tween: Tween
 var particle_scene = preload("res://Scenes/VFX/hit_particles.tscn")
 var already_hit_targets = []
+var slash_scene = preload("res://Scenes/slash_projectile.tscn")
+# Fury Logic
+var current_fury: float = 0.0
+var max_fury: float = 2.0
+var fury_gain_per_hit: float = 0.5  # 0.5 means 2 hits = 1 full charge
 
 func _ready() -> void:
 	add_to_group("Player")
@@ -84,6 +91,10 @@ func _process(_delta: float) -> void:
 		interact_label.text = "Press F to Interact"
 	else:
 		interact_label.visible = false
+	
+	# NEW: Check for secondary attack
+	if Input.is_action_just_pressed("secondary_attack"):
+		try_slash_attack()
 
 
 
@@ -362,6 +373,10 @@ func _on_hitbox_area_entered(area: Area3D) -> void:
 		# Now apply the damage and effects
 		target.take_damage(10, global_position)
 		
+		# Check group to give Fury
+		if target.is_in_group("Enemy"):
+			gain_fury(fury_gain_per_hit)
+		
 		# Spawn Particles
 		var vfx = particle_scene.instantiate()
 		get_tree().root.add_child(vfx)
@@ -476,3 +491,41 @@ func get_valid_interactable():
 				closest_item = area
 	
 	return closest_item
+
+func update_fury_ui():
+	# Bar 1 fills from 0.0 to 1.0 fury
+	fury_bar_1.value = clamp(current_fury * 100, 0, 100)
+	
+	# Bar 2 fills from 1.0 to 2.0 fury
+	# We subtract 1.0 so it only starts filling after we have more than 1 charge
+	fury_bar_2.value = clamp((current_fury - 1.0) * 100, 0, 100)
+
+func gain_fury(amount: float):
+	current_fury = clamp(current_fury + amount, 0, max_fury)
+	update_fury_ui()
+
+func spend_fury(amount: float) -> bool:
+	if current_fury >= amount:
+		current_fury -= amount
+		update_fury_ui()
+		return true
+	return false
+
+func try_slash_attack():
+	# 1. Check if we have enough Fury (1.0 = 1 full diamond)
+	if spend_fury(1.0):
+		spawn_slash()
+
+func spawn_slash():
+	var slash = slash_scene.instantiate()
+	get_parent().add_child(slash)
+	
+	# Spawn in front of player, at chest height
+	slash.global_position = global_position + Vector3(0, 1.0, 0) + (transform.basis.z * 1.0)
+	
+	# Match player rotation
+	slash.global_rotation = $MeshInstance3D.global_rotation
+	
+	# Optional: Play Swing Sound again
+	swing_audio.pitch_scale = 0.8 # Lower pitch for "heavy" attack
+	swing_audio.play()

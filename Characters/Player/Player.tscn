@@ -6,6 +6,8 @@
 [ext_resource type="Script" uid="uid://74b4jjxhk3dg" path="res://Scripts/Systems/camera_3d.gd" id="3_kne1u"]
 [ext_resource type="Script" uid="uid://bs427duvqm7ol" path="res://Scripts/Systems/ray_cast_3d.gd" id="4_e80uo"]
 [ext_resource type="PackedScene" uid="uid://7j3k73we3xp3" path="res://Scenes/reticle.tscn" id="5_oc658"]
+[ext_resource type="Texture2D" uid="uid://b25bbgsrsmv3v" path="res://UI/Assets/Diamond Stage 5.png" id="7_14m2a"]
+[ext_resource type="Texture2D" uid="uid://b10k48pv06vk0" path="res://UI/Assets/Diamond Stage 1.png" id="8_dl42p"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_0rwas"]
 
@@ -120,5 +122,19 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD" unique_id=2067991509]
+
+[node name="Fury2" type="TextureProgressBar" parent="HUD/VBoxContainer" unique_id=1759751204]
+layout_mode = 2
+fill_mode = 3
+texture_under = ExtResource("7_14m2a")
+texture_progress = ExtResource("8_dl42p")
+
+[node name="Fury1" type="TextureProgressBar" parent="HUD/VBoxContainer" unique_id=1637055289]
+layout_mode = 2
+fill_mode = 3
+texture_under = ExtResource("7_14m2a")
+texture_progress = ExtResource("8_dl42p")
 
 [connection signal="area_entered" from="MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox" to="." method="_on_hitbox_area_entered"]
