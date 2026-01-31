@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bmve7pc6dgeuo" path="res://Characters/NPC/training_dummy.tscn" id="4_of6x0"]
 [ext_resource type="PackedScene" uid="uid://b2bjij4b2veo8" path="res://Scenes/Interactables/button_interactable.tscn" id="5_7c0i0"]
 [ext_resource type="PackedScene" uid="uid://dxgpqxrbn1cuy" path="res://Scenes/Interactables/moving_platform.tscn" id="6_ds1wg"]
+[ext_resource type="PackedScene" uid="uid://qmmqi8m4nxmv" path="res://Scenes/destructible_crate.tscn" id="7_nyoi4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6wt81"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -84,6 +85,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.642245, 0.042643785, -8.521
 
 [node name="Anchor" parent="." unique_id=258147943 instance=ExtResource("6_ds1wg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.622174, -0.24621439, -8.528757)
+
+[node name="DestructibleCrate" parent="." unique_id=2002883693 instance=ExtResource("7_nyoi4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.697032, 0.65873015, -3.3083057)
 
 [connection signal="interact_triggered" from="ButtonInteractable" to="Anchor/MovingPlatform" method="activate_platform"]
 

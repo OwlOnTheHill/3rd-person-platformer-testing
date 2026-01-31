@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://qmmqi8m4nxmv"]
+
+[ext_resource type="Script" uid="uid://b65f81ggjx8kp" path="res://Scripts/Systems/destructible_crate.gd" id="1_n4exu"]
+[ext_resource type="PackedScene" uid="uid://dye13va7yfgle" path="res://Scenes/Interactables/gold_coin.tscn" id="2_8vmuv"]
+[ext_resource type="PackedScene" uid="uid://56h8w1nf80mo" path="res://Scenes/VFX/hit_particles.tscn" id="3_vppef"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_esda7"]
+albedo_color = Color(0.22745098, 0.18431373, 0.16470589, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8vmuv"]
+material = SubResource("StandardMaterial3D_esda7")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vppef"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8vmuv"]
+size = Vector3(1.1, 1.1, 1.1)
+
+[node name="DestructibleCrate" type="StaticBody3D" unique_id=2002883693]
+script = ExtResource("1_n4exu")
+loot_scene = ExtResource("2_8vmuv")
+debris_scene = ExtResource("3_vppef")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=134159120]
+mesh = SubResource("BoxMesh_8vmuv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1174948586]
+shape = SubResource("BoxShape3D_vppef")
+
+[node name="Hurtbox" type="Area3D" parent="." unique_id=543974943]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox" unique_id=1447533658]
+shape = SubResource("BoxShape3D_8vmuv")

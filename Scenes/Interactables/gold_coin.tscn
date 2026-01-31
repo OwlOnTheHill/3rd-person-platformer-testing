@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dye13va7yfgle"]
+
+[ext_resource type="Script" uid="uid://chqvrx8x48lyi" path="res://Scripts/Interactables/gold_coin.gd" id="1_mdgv5"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_kml4k"]
+radius = 0.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mdgv5"]
+albedo_color = Color(0.96862745, 0.91764706, 0, 1)
+metallic = 1.0
+roughness = 0.2
+
+[sub_resource type="SphereMesh" id="SphereMesh_u5o0r"]
+material = SubResource("StandardMaterial3D_mdgv5")
+radius = 0.2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mdgv5"]
+
+[node name="GoldCoin" type="RigidBody3D" unique_id=1507455367]
+script = ExtResource("1_mdgv5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2121543898]
+shape = SubResource("SphereShape3D_kml4k")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1083279826]
+mesh = SubResource("SphereMesh_u5o0r")
+
+[node name="PickupArea" type="Area3D" parent="." unique_id=900401003]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PickupArea" unique_id=782707937]
+shape = SubResource("SphereShape3D_mdgv5")

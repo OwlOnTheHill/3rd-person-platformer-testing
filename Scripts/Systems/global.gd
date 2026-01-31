@@ -1,5 +1,7 @@
 extends Node
 
+var coins: int = 0
+
 func hit_stop(time_scale: float, duration: float):
 	Engine.time_scale = time_scale
 	

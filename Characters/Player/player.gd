@@ -37,6 +37,8 @@ var particle_scene = preload("res://Scenes/VFX/hit_particles.tscn")
 var already_hit_targets = []
 
 func _ready() -> void:
+	add_to_group("Player")
+	
 	# If we forgot to assign the camera in the inspector, try to find it
 	if camera == null:
 		camera = get_viewport().get_camera_3d()
