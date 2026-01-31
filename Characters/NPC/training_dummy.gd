@@ -6,10 +6,14 @@ var damage_node = preload("res://Scenes/damage_number.tscn")
 var active_damage_label: Label3D = null
 var current_damage_sum: int = 0
 
+var flash_mat = preload("res://Materials/flash_material.tres")
+
 func take_damage(amount: int, source_pos: Vector3):
 	# 1. Handle Recoil
 	var knockback_dir = (global_position - source_pos).normalized()
 	recoil(knockback_dir)
+	
+	flash()
 	
 	# The "Reset" Logic
 	# If the label doesn't exist anymore, it means the previous combo ended.
@@ -42,5 +46,18 @@ func recoil(dir: Vector3):
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	
 	# Bounce back to original (0,0,0)
-	tween.tween_property(mesh, "rotation", Vector3.ZERO, 0.5)\
+	tween.tween_property(mesh, "rotation", Vector3.ZERO, 0.2)\
 		.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+func flash():
+	# 1. Apply the white material on top of the existing look
+	mesh.material_overlay = flash_mat
+	
+	# 2. Create a tween to remove it
+	var tween = create_tween()
+	
+	# Wait for 0.05 seconds (instant flash)
+	tween.tween_interval(0.05)
+	
+	# 3. Clear the material automatically
+	tween.tween_callback(func(): mesh.material_overlay = null)

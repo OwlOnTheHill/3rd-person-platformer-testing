@@ -340,6 +340,11 @@ func _on_hitbox_area_entered(area: Area3D) -> void:
 	# This reaches out to dummy script
 	if area.get_parent().has_method("take_damage"):
 		area.get_parent().take_damage(10, global_position)
+		
+		# NEW: Freeze time! 
+		# 0.05 scale means time moves at 5% speed (almost stopped)
+		# 0.15 duration is how long the "freeze" lasts in real time
+		Global.hit_stop(0.05, 0.15)
 
 func find_closest_target():
 	# Safety Check: if no camera, cant check frustum
