@@ -8,7 +8,7 @@ extends StaticBody3D
 
 @export var health: int = 20
 
-func take_damage(amount: int, source_pos: Vector3):
+func take_damage(amount: int, _source_pos: Vector3):
 	health -= amount
 	
 	# Optional: Flash white (if you want to copy the dummy logic later)

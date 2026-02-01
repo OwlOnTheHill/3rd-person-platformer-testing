@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://c5brmevsfupe"]
+
+[ext_resource type="Script" uid="uid://qlcm3mrmb5em" path="res://Characters/NPC/npc_dialogue.gd" id="1_y0ah1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5e338"]
+albedo_color = Color(0.42745098, 1, 1, 1)
+emission_enabled = true
+emission = Color(0, 1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a48o8"]
+material = SubResource("StandardMaterial3D_5e338")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8g6pv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ncyov"]
+size = Vector3(1.5, 1.5, 1.5)
+
+[node name="NPC_WiseCube" type="StaticBody3D" unique_id=2118592502]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1564767076]
+mesh = SubResource("BoxMesh_a48o8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=262994126]
+shape = SubResource("BoxShape3D_8g6pv")
+
+[node name="InteractionArea" type="Area3D" parent="." unique_id=967190280]
+script = ExtResource("1_y0ah1")
+dialogue_lines = Array[String](["Hello there, traveler!", "I am a cube.", "This is a test of the dialogue system!"])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=1085574841]
+shape = SubResource("BoxShape3D_ncyov")

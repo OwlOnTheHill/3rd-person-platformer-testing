@@ -15,6 +15,7 @@ var jumped_on = false : set = set_jumped_on
 func set_jumped_on(value):
 	jumped_on = value
 
+@onready var dialogue_manager = $HUD/DialogueBox
 @onready var fury_bar_1 = $HUD/VBoxContainer/Fury1
 @onready var fury_bar_2 = $HUD/VBoxContainer/Fury2
 @onready var swing_audio = $MeshInstance3D/WeaponAnchor/SwingAudio
@@ -83,12 +84,18 @@ func _process(_delta: float) -> void:
 			reticle_tween.kill() # stop animation when lock on is lost
 			reticle.scale = Vector2.ONE # reset size
 	
-	# NEW: Check for interactables to show UI
 	var interactable = get_valid_interactable()
 	
 	if interactable:
 		interact_label.visible = true
-		interact_label.text = "Press F to Interact"
+		# Check if the object has a custom message, otherwise default to "Interact"
+		var action_name = "Interact"
+		
+		# This safely checks if the variable exists on the target script
+		if "prompt_message" in interactable:
+			action_name = interactable.prompt_message
+			
+		interact_label.text = "Press F to " + action_name
 	else:
 		interact_label.visible = false
 	
@@ -472,6 +479,12 @@ func start_reticle_throb():
 	reticle_tween.tween_property(reticle, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE)
 
 func try_interact():
+	# PRIORITY 1: If dialogue is open, read the next page
+	if dialogue_manager.is_active:
+		dialogue_manager.advance_dialogue()
+		return
+
+	# PRIORITY 2: If no dialogue, look for items to pick up
 	var item = get_valid_interactable()
 	if item:
 		item.interact()
