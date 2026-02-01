@@ -520,8 +520,9 @@ func spawn_slash():
 	var slash = slash_scene.instantiate()
 	get_parent().add_child(slash)
 	
-	# Spawn in front of player, at chest height
-	slash.global_position = global_position + Vector3(0, 1.0, 0) + (transform.basis.z * 1.0)
+	var sword_blade = $MeshInstance3D/WeaponAnchor/CSGBox3D
+	
+	slash.global_position = sword_blade.global_position
 	
 	# Match player rotation
 	slash.global_rotation = $MeshInstance3D.global_rotation
