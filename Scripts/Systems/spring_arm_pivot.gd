@@ -52,6 +52,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	Input.flush_buffered_events()
 
 	if Input.is_action_just_pressed("pause"):
+		var player = get_tree().get_first_node_in_group("Player")
+		if player and player.get("is_interacting"):
+			return
+	
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 			if owner.has_node("Reticle"):

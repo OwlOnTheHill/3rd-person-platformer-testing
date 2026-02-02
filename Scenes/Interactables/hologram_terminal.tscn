@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://dvqe55tbf5b7j"]
+
+[ext_resource type="Script" uid="uid://b8ngwx7bwacjk" path="res://Scripts/Interactables/hologram_terminal.gd" id="1_cy2m2"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_m6xrd"]
+size = Vector3(0.5, 1, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cy2m2"]
+size = Vector3(0.5, 1, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m6xrd"]
+bg_color = Color(0.3137255, 0.96862745, 0.96862745, 0.6392157)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.99608415, 0.99608403, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_m6xrd"]
+size = Vector2(1, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cy2m2"]
+transparency = 1
+shading_mode = 0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_m6xrd"]
+radius = 1.5
+
+[node name="HologramTerminal" type="StaticBody3D" unique_id=1417424964]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1736095049]
+mesh = SubResource("BoxMesh_m6xrd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1313538676]
+shape = SubResource("BoxShape3D_cy2m2")
+
+[node name="Viewport" type="SubViewport" parent="." unique_id=1983713551]
+transparent_bg = true
+size = Vector2i(512, 300)
+
+[node name="ScreenUI" type="Control" parent="Viewport" unique_id=972237377]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="Viewport/ScreenUI" unique_id=2104874515]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_m6xrd")
+
+[node name="Label" type="Label" parent="Viewport/ScreenUI/Panel" unique_id=624332563]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "WELCOME TO TERMINAL"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="Viewport/ScreenUI/Panel/Label" unique_id=401012409]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -55.0
+offset_top = -15.5
+offset_right = 55.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "ACCESS FILES"
+
+[node name="HologramScreen" type="MeshInstance3D" parent="." unique_id=1132782866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.20349044)
+mesh = SubResource("QuadMesh_m6xrd")
+surface_material_override/0 = SubResource("StandardMaterial3D_cy2m2")
+
+[node name="InteractionArea" type="Area3D" parent="." unique_id=1181903343]
+script = ExtResource("1_cy2m2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=521802257]
+shape = SubResource("SphereShape3D_m6xrd")
+
+[node name="TerminalCamera" type="Camera3D" parent="." unique_id=15346041]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 1)

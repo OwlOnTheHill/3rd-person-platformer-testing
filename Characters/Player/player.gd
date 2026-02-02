@@ -43,6 +43,7 @@ var slash_scene = preload("res://Scenes/slash_projectile.tscn")
 var current_fury: float = 0.0
 var max_fury: float = 2.0
 var fury_gain_per_hit: float = 0.5  # 0.5 means 2 hits = 1 full charge
+var is_interacting: bool = false
 
 func _ready() -> void:
 	add_to_group("Player")
@@ -543,3 +544,22 @@ func spawn_slash():
 	# Optional: Play Swing Sound again
 	swing_audio.pitch_scale = 0.8 # Lower pitch for "heavy" attack
 	swing_audio.play()
+
+func toggle_interaction_mode(active: bool):
+	is_interacting = active
+	
+	if active:
+		# Stop movement and animation
+		velocity = Vector3.ZERO
+		set_physics_process(false) # Stops the _physics_process loop
+		$HUD.visible = false # Hide HUD so we only see the terminal
+		
+		# Hide the player model so the camera doesn't clip through the head
+		$MeshInstance3D.visible = false 
+	else:
+		# Restore control
+		set_physics_process(true)
+		$HUD.visible = true
+		
+		# Show the player model again
+		$MeshInstance3D.visible = true
