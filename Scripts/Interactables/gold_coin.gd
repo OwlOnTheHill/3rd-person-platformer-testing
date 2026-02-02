@@ -13,7 +13,6 @@ func _on_pickup_area_body_entered(body: Node3D):
 func collect():
 	# 1. Add to global score
 	Global.coins += 1
-	print("Coins collected: ", Global.coins) # Debug print
+	print("Coins collected: ", Global.coins)
 	
-	# 2. Destroy the coin
 	queue_free()

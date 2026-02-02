@@ -32,11 +32,9 @@ func interact():
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _input(event):
-	# If terminal isn't active, do nothing
 	if not is_active:
 		return
 
-	# NEW: Listen for TAB (or whatever you bound to 'exit_interaction')
 	if event.is_action_pressed("exit_interaction"):
 		exit_terminal()
 

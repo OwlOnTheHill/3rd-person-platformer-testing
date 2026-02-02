@@ -1,20 +1,21 @@
 extends CharacterBody3D
-# All possible player states
+
+# --- STATE MACHINE SETUP ---
+# Enums are basically a list of "modes" the player can be in.
+# Using enums prevents typos (e.g., mispelling "attack" as "atack").
 enum State { IDLE, MOVE, JUMP, ATTACK, COMBAT_IDLE, COMBAT_MOVE }
-# The current state of the player
 var current_state = State.IDLE
-# helps track if we just entered a state
 var state_just_changed = false
 
+# --- MOVEMENT SETTINGS ---
 const SPEED = 4.5
 const SPRINT = 10.0
 const JUMP_VELOCITY = 5.5
+# Wall Gravity is lower than normal gravity so we slide down walls slowly
 const WALL_GRAVITY = Vector3(0, -5.5, 0)
 
-var jumped_on = false : set = set_jumped_on
-func set_jumped_on(value):
-	jumped_on = value
-
+# --- REFERENCES (Dependencies) ---
+# @onready vars get nodes only after they are ready in the scene tree.
 @onready var dialogue_manager = $HUD/DialogueBox
 @onready var fury_bar_1 = $HUD/VBoxContainer/Fury1
 @onready var fury_bar_2 = $HUD/VBoxContainer/Fury2
@@ -22,12 +23,16 @@ func set_jumped_on(value):
 @onready var interact_label = $HUD/InteractLabel
 @onready var hitbox = $MeshInstance3D/WeaponAnchor/CSGBox3D/Hitbox
 @onready var weapon_anchor = $MeshInstance3D/WeaponAnchor
-@onready var raycast = $MeshInstance3D/RayCast3D
+@onready var raycast = $MeshInstance3D/RayCast3D # Used for Wall detection
 @onready var reticle = $Reticle
+
+# @export vars appear in the Inspector for easy tweaking.
 @export var camera: Camera3D
 @export var rotation_speed: float = 18.0
 @export var max_lock_distance: float = 24.0
 
+# --- GAMEPLAY FLAGS ---
+# These track "Yes/No" states for logic checks.
 var is_combat_mode = false
 var last_collided_wall: Node3D = null
 var sprinting_before_jump = false
@@ -35,92 +40,89 @@ var was_on_floor = false
 var is_attacking = false
 var locked_target: Node3D = null
 var is_locked_on: bool = false
+var is_interacting: bool = false
+var jumped_on = false : set = set_jumped_on # Setter allows us to execute code when variable changes
+
+# --- COMBAT RESOURCES ---
 var reticle_tween: Tween
 var particle_scene = preload("res://Scenes/VFX/hit_particles.tscn")
-var already_hit_targets = []
 var slash_scene = preload("res://Scenes/slash_projectile.tscn")
-# Fury Logic
+var already_hit_targets = [] # Prevents hitting the same enemy 10 times in 1 swing
+
+# Fury System
 var current_fury: float = 0.0
 var max_fury: float = 2.0
 var fury_gain_per_hit: float = 0.5  # 0.5 means 2 hits = 1 full charge
-var is_interacting: bool = false
+
+func set_jumped_on(value):
+	jumped_on = value
+
+
 
 func _ready() -> void:
 	add_to_group("Player")
-	
 	# If we forgot to assign the camera in the inspector, try to find it
 	if camera == null:
 		camera = get_viewport().get_camera_3d()
 
 
 
+# _process runs every visual frame. Put UI and Input checks here.
 func _process(_delta: float) -> void:
+	# 1. LOCK-ON UI LOGIC
 	if is_locked_on and locked_target:
-		# Show the reticle
 		reticle.visible = true
 		
-		# Start animation if not running
+		# Pulse the reticle if not already pulsing
 		if reticle_tween == null or not reticle_tween.is_running():
 			start_reticle_throb()
 		
-		# Handle Fade Logic
+		# Fade reticle if wall is in the way
 		if is_line_of_sight_clear(locked_target):
 			reticle.modulate.a = 1.0
 		else:
 			reticle.modulate.a = 0.4
 		
-		# Get the enemy's 3D position (offset slightly for the chest)
-		var target_pos = locked_target.global_position + Vector3(0, 0.6, 0)
-		
-		# Convert 3D position to 2D screen coordinates
+		# Map 3D World Position -> 2D Screen Position
+		var target_pos = locked_target.global_position + Vector3(0, 0.6, 0) # Adjust "0.6" to center spawn from chest
 		var screen_pos = camera.unproject_position(target_pos)
-		
-		# Move the UI element to that position
-		reticle.position = screen_pos - (reticle.size / 2) # Center the X on the target
+		reticle.position = screen_pos - (reticle.size / 2)
 	else:
-		# Hide it when not locked on
-		reticle.visible = false
+		reticle.visible = false # Stop animations to save performance
 		
 		if reticle_tween:
 			reticle_tween.kill() # stop animation when lock on is lost
 			reticle.scale = Vector2.ONE # reset size
 	
+	# 2. INTERACTION UI
 	var interactable = get_valid_interactable()
-	
 	if interactable:
 		interact_label.visible = true
-		# Check if the object has a custom message, otherwise default to "Interact"
 		var action_name = "Interact"
-		
-		# This safely checks if the variable exists on the target script
+		# Dynamic prompt: checks if the object script has a 'prompt_message' variable
 		if "prompt_message" in interactable:
 			action_name = interactable.prompt_message
-			
 		interact_label.text = "Press F to " + action_name
 	else:
 		interact_label.visible = false
 	
-	# NEW: Check for secondary attack
+	# 3. SPECIAL ATTACKS
 	if Input.is_action_just_pressed("secondary_attack"):
 		try_slash_attack()
 
 
 
+# _physics_process runs at a fixed rate (60 ticks/sec). Put MOVEMENT here.
 func _physics_process(delta: float) -> void:
-	# 1. Logic that runs EVERY frame regardless of state
+	# 1. GLOBAL PHYSICS (Runs in every state)
 	apply_gravity(delta)
 	handle_coyote_time()
 	
-	if Input.is_action_just_pressed("equip"):
-		toggle_weapon()
+	if Input.is_action_just_pressed("equip"): toggle_weapon()
+	if Input.is_action_just_pressed("lock_on"): toggle_lock_on()
+	if Input.is_action_just_pressed("interact"): try_interact()
 	
-	if Input.is_action_just_pressed("lock_on"):
-		toggle_lock_on()
-	
-	if Input.is_action_just_pressed("interact"):
-		try_interact()
-
-	# 2. State Switcher: Only runs the code for our current mode
+	# 2. STATE MACHINE SWITCHER
 	match current_state:
 		State.IDLE:
 			if is_locked_on: change_state(State.COMBAT_IDLE)
@@ -139,19 +141,18 @@ func _physics_process(delta: float) -> void:
 		State.ATTACK:
 			handle_attack_state(delta)
 
-	# 3. Final Movement: Apply all the velocity changes we calculated
-	move_and_slide()
+	# 3. APPLY MOVEMENT
+	move_and_slide() # Godot's built-in physics mover
 	
-	# Wall collision reset logic (your raycast logic)
+	# 4. CLEANUP FOR NEXT FRAME
 	handle_wall_detection()
-	
 	if is_on_floor():
 		jumped_on = false
 		last_collided_wall = null
-	# Update this for next frame
 	was_on_floor = is_on_floor()
 
-
+# --- STATE HANDLERS ---
+# These functions contain the logic specific to each "Mode"
 
 func handle_idle_state(_delta: float):
 	# Slow down to a stop
@@ -173,18 +174,19 @@ func handle_idle_state(_delta: float):
 
 
 func handle_move_state(delta: float):
-	# 1. Get Input
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	
-	# 2. Calculate Direction relative to Camera
+	# CAMERA RELATIVE MOVEMENT:
+	# Convert Input (Up/Down) into Camera Direction (Forward/Back)
 	var camera_basis = $SpringArmPivot.transform.basis
 	var forward = camera_basis.z.normalized()
-	forward.y = 0
+	forward.y = 0 # Flatten so we don't walk into the floor
 	var right = camera_basis.x.normalized()
-	right.y = 0
+	right.y = 0 # Flatten so we don't walk into the floor
+	
 	var direction = (forward * input_dir.y + right * input_dir.x).normalized()
 	
-	# 3. Transitions: If we stop moving, go to IDLE. If we jump, go to JUMP.
+	# Transition Checks
 	if input_dir == Vector2.ZERO:
 		change_state(State.IDLE)
 	
@@ -202,12 +204,12 @@ func handle_move_state(delta: float):
 	if Input.is_action_just_pressed("attack") and is_combat_mode and not is_attacking:
 		change_state(State.ATTACK)
 
-	# 4. Mesh Rotation (Your original smooth lerp math)
+	# Smooth Rotation (Lerp Angle)
 	if input_dir != Vector2.ZERO:
 		var target_rotation = $SpringArmPivot.rotation.y - input_dir.angle() - deg_to_rad(90)
 		$MeshInstance3D.rotation.y = lerp_angle($MeshInstance3D.rotation.y, target_rotation, rotation_speed * delta)
 	
-	# 5. Velocity Calculation (Sprinting vs Walking)
+	# Sprint Logic
 	var sprinting = Input.is_action_pressed("sprint")
 	var target_speed = SPRINT if sprinting and (is_on_floor() or sprinting_before_jump) else SPEED
 	
@@ -221,29 +223,29 @@ func handle_move_state(delta: float):
 
 
 func handle_jump_state(delta: float):
-	# 1. Use the same movement math as Move State (so you can steer in mid-air)
+	# Air control logic (same as move but usually you'd add a multiplier to reduce control)
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var camera_basis = $SpringArmPivot.transform.basis
 	var forward = (camera_basis.z * Vector3(1, 0, 1)).normalized()
 	var right = (camera_basis.x * Vector3(1, 0, 1)).normalized()
 	var direction = (forward * input_dir.y + right * input_dir.x).normalized()
 	
-	# 2. Set air speed (Sprinting vs Walking)
 	var speed = SPRINT if sprinting_before_jump else SPEED
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
 
-	# 3. Apply the Jump Force
+	# Apply the Jump Force
 	# We only do this if we JUST entered the jump state
 	if state_just_changed:
 		velocity.y = JUMP_VELOCITY
 		state_just_changed = false
-
-	# 4. Transitions
+	
 	if is_on_floor():
 		change_state(State.IDLE)
 	
+	# WALL JUMP LOGIC
 	if Input.is_action_just_pressed("jump"):
+		# Check if we are in the air, haven't wall jumped yet, and a wall is nearby
 		if not jumped_on and raycast.is_colliding():
 			velocity.y = JUMP_VELOCITY
 			jumped_on = true
@@ -260,11 +262,10 @@ func handle_jump_state(delta: float):
 
 
 func handle_attack_state(_delta: float):
-	# We stop horizontal movement so the attack feels "grounded"
+	# Stop movement so attacks have weight
 	velocity.x = move_toward(velocity.x, 0, SPEED)
 	velocity.z = move_toward(velocity.z, 0, SPEED)
-
-	# If we just entered this state, start the swing
+	
 	if state_just_changed:
 		state_just_changed = false
 		execute_attack_animation()
@@ -274,14 +275,12 @@ func execute_attack_animation():
 	hitbox.monitoring = true
 	already_hit_targets.clear()
 	
-	# Play sound with random pitch for variety
 	swing_audio.pitch_scale = randf_range(0.9, 1.1)
 	swing_audio.play()
 	
+	# Simple Procedural Animation (Rotating the weapon anchor)
 	var tween = create_tween()
-	# Swing forward
 	tween.tween_property(weapon_anchor, "rotation:x", deg_to_rad(-90), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	# Return to start
 	tween.tween_property(weapon_anchor, "rotation:x", deg_to_rad(0), 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	
 	tween.finished.connect(func(): 
@@ -297,14 +296,13 @@ func handle_combat_idle_state(delta: float):
 	# Face the target
 	look_at_target(delta)
 	
-	# Transitions
 	if Input.get_vector("move_left", "move_right", "move_forward", "move_back") != Vector2.ZERO:
 		change_state(State.COMBAT_MOVE)
 	
 	if Input.is_action_just_pressed("jump"):
 		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
 			change_state(State.JUMP)
-
+	
 	if Input.is_action_just_pressed("attack") and is_combat_mode:
 		change_state(State.ATTACK)
 
@@ -321,14 +319,13 @@ func handle_combat_move_state(delta: float):
 	velocity.x = direction.x * SPEED
 	velocity.z = direction.z * SPEED
 	
-	# Transitions
 	if input_dir == Vector2.ZERO:
 		change_state(State.COMBAT_IDLE)
 		
 	if Input.is_action_just_pressed("jump"):
 		if is_on_floor() or not $CoyoteTimer.is_stopped() or (not jumped_on and raycast.is_colliding()):
 			change_state(State.JUMP)
-
+	
 	if Input.is_action_just_pressed("attack") and is_combat_mode:
 		change_state(State.ATTACK)
 
@@ -340,6 +337,7 @@ func toggle_weapon():
 
 func apply_gravity(delta):
 	if not is_on_floor():
+		# Wall Slide Gravity (Slower fall)
 		if is_on_wall_only() and raycast.is_colliding() and velocity.y < 0:
 			velocity += WALL_GRAVITY * delta
 		else:
@@ -366,22 +364,15 @@ func change_state(new_state: State):
 	state_just_changed = true
 
 func _on_hitbox_area_entered(area: Area3D) -> void:
-	# Get the enemy root node (the dummy)
-	var target = area.get_parent()
+	# Combat Hit Logic
+	var target = area.get_parent() # Assuming hitbox is a child of the enemy body
 	
-	# CHECK 1: Have we already hit this specific enemy with this swing?
-	if target in already_hit_targets:
-		return # Stop here! Do not damage them again.
+	if target in already_hit_targets: return # Don't hit same frame twice
 	
-	# CHECK 2: Is it a valid enemy?
 	if target.has_method("take_damage"):
-		# Mark them as "Hit" for this swing
 		already_hit_targets.append(target)
-		
-		# Now apply the damage and effects
 		target.take_damage(10, global_position)
 		
-		# Check group to give Fury
 		if target.is_in_group("Enemy"):
 			gain_fury(fury_gain_per_hit)
 		
@@ -408,7 +399,7 @@ func find_closest_target():
 	for target in targets:
 		# check if its a valid target
 		if target.has_method("take_damage") and target != self:
-			# 1. Camera Visibility: can I actually see target
+			# Camera Visibility: can I actually see target
 			if not camera.is_position_in_frustum(target.global_position):
 				continue
 			
@@ -526,7 +517,7 @@ func spend_fury(amount: float) -> bool:
 	return false
 
 func try_slash_attack():
-	# 1. Check if we have enough Fury (1.0 = 1 full diamond)
+	# Check if we have enough Fury (1.0 = 1 full diamond)
 	if spend_fury(1.0):
 		spawn_slash()
 
@@ -541,7 +532,6 @@ func spawn_slash():
 	# Match player rotation
 	slash.global_rotation = $MeshInstance3D.global_rotation
 	
-	# Optional: Play Swing Sound again
 	swing_audio.pitch_scale = 0.8 # Lower pitch for "heavy" attack
 	swing_audio.play()
 

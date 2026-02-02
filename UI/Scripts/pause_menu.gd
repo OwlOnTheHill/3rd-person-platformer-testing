@@ -1,4 +1,6 @@
 extends Control
+#Inspector Checklist:
+# Must set process to Always so menu doesnt also freeze with game time
 
 @onready var game = $"../"
 @onready var resume_button = $VBoxContainer/Resume

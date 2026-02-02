@@ -2,8 +2,6 @@ extends Area3D
 
 @export var prompt_message: String = "Chat"
 
-# I previously put "..." here, which caused the error. 
-# This is the full correct list:
 @export_multiline var dialogue_lines: Array[String] = [
 	"Hello there, traveler.",
 	"I am a cube.",

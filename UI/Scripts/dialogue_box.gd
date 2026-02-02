@@ -6,8 +6,6 @@ var dialogue_lines: Array[String] = []
 var current_line_index: int = 0
 var is_active: bool = false
 var is_typing: bool = false
-
-# NEW: We store the active tween here so we can kill it later
 var current_tween: Tween 
 
 func _ready():
@@ -28,7 +26,6 @@ func show_current_line():
 	text_label.visible_ratio = 0.0
 	is_typing = true
 	
-	# 1. Store the tween in our variable
 	if current_tween:
 		current_tween.kill() # Safety check
 	current_tween = create_tween()
@@ -39,13 +36,13 @@ func show_current_line():
 	current_tween.finished.connect(func(): is_typing = false)
 
 func advance_dialogue():
-	# FEATURE: Skip Typing
+	# Skip Typing
 	if is_typing:
-		# 1. STOP the animation immediately!
+		# STOP the animation immediately!
 		if current_tween:
 			current_tween.kill()
 		
-		# 2. Force the text to appear instantly
+		# Force the text to appear instantly
 		text_label.visible_ratio = 1.0
 		is_typing = false
 		return # Stop here, do not go to next page
